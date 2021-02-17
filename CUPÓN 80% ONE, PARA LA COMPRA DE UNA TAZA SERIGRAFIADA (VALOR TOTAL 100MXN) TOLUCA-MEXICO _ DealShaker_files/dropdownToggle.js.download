@@ -1,0 +1,59 @@
+$(document).ready(function () {
+
+//    toggle only current dropdown menu
+    function trigger(e) {
+        $(this).next('.dropdown-menu').toggle();
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+
+
+    //select collapsed menu for the current dropdown button
+    // var currentMenu = $(this).parents("nav").find(".navbar-collapse");
+    // var currentSubMenu = $(currentMenu).find(".drop-on-hover");
+    // var restorIcon = $(currentMenu).find(".plus-minus");
+    //
+
+
+//    toggle only current dropdown menu
+    $('.dropdown-toggle').on("click", trigger);
+
+
+
+    $('.navbar-toggle').on("click", function () {
+
+        //
+        // $(this).parents("nav").find(".navbar-collapse").css("background-color", "red");
+
+
+
+        if ($(this).parents("nav").find(".navbar-collapse").attr('aria-expanded') === "false") {
+            $(this).parents("nav").find(".navbar-collapse").find(".drop-on-hover").css("display", "none");
+            $(this).parents("nav").find(".navbar-collapse").find(".plus-minus").removeClass('fa-minus').addClass('fa-plus');
+        }
+
+        else {
+            $(this).parents("nav").find(".navbar-collapse").find(".drop-on-hover").css("display", "none");
+        }
+    });
+
+
+
+//    shift between plus and minus icons for toggle navigation
+    function changeClass() {
+        $(this).find('.plus-minus').toggleClass('fa-minus');
+    }
+
+    $('.wrap-btn-mobile-menu').on('click', changeClass);
+
+
+
+
+
+//    SELECT PARENT
+    $(".home-link .dropdown-menu.drop-on-hover .active").parents(".dropdown.dropdown-submenu").addClass("active");
+
+
+})
+;

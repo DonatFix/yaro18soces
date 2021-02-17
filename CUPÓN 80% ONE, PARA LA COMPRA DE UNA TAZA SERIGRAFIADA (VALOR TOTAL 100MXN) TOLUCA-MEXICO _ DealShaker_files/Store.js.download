@@ -1,0 +1,180 @@
+var Store = Store || {};
+
+Store.index = (function () {
+
+    function autoresizeTextAreas() {
+        var textAreas = $('textarea');
+        autosize(textAreas);
+    }
+
+    function initializeTooltips(selector) {
+        var elSelector = (typeof selector !== 'undefined') ? selector : '[data-toggle="tooltip"]';
+        $(elSelector).tooltip();
+    }
+
+    function ajaxPreloader(preloaderContainer, callerButton) {
+
+        var preloaderHTML = '<div class="preloader-container"><i class="fa fa-spinner fa-spin"></i></div>',
+            submitButton = $(callerButton),
+            textCancel = submitButton.data('label-cancel'),
+            textLoading = submitButton.data('label-loading'),
+            submitButtonText = (submitButton.text() == textCancel) ? textLoading : textCancel;
+
+        if (preloaderContainer.find('.preloader-container').length == 0) {
+            preloaderContainer.append(preloaderHTML);
+            preloaderContainer.find('.preloader-container').fadeIn();
+            submitButton.html(submitButtonText).append(' <i class="fa fa-spinner fa-spin"></i>');
+        } else {
+            preloaderContainer.find('.preloader-container').fadeOut(function () {
+                $(this).remove();
+            });
+            submitButton.html(submitButtonText);
+        }
+
+        submitButton.prop('disabled', function (i, v) {
+            return !v;
+        });
+    }
+
+    function ajaxPreloaderContainer(domElement) {
+
+        var preloaderHTML = '<div class="preloader-container"><i class="fa fa-spinner fa-spin"></i></div>';
+
+        if (domElement.find('.preloader-container').length == 0) {
+            domElement.append(preloaderHTML);
+            domElement.find('.preloader-container').fadeIn();
+        } else {
+            domElement.find('.preloader-container').fadeOut(function () {
+                $(this).remove();
+            });
+        }
+
+    }
+
+    function buttonPreloader(button) {
+
+        var _button = button,
+            _buttonIcon = _button.find('i'),
+            _spinnerIcon = 'fa-spinner';
+
+        if (_button.prop("disabled")) {
+            _buttonIcon.removeClass(_spinnerIcon);
+            _button.prop('disabled', false);
+        } else {
+            _buttonIcon.addClass(_spinnerIcon);
+            _button.prop('disabled', true);
+        }
+    }
+
+    function addLoading(element) {
+        element.css({
+            'background': 'rgba(255, 255, 255, 0.78)',
+            'width': '100%',
+            'position': 'absolute',
+            'z-index': 100,
+            'padding': 0,
+            'margin': 0,
+            'left': 0,
+            'top': 0,
+            'bottom': 0
+        }).html('<span class="fa fa-spinner fa-pulse fa-3x fa-fw" style="top: 45%; position: relative; left: 45%;"></span>')
+    }
+
+    function removeLoading(element) {
+        element.empty().removeAttr('style');
+    }
+
+    function setCookiesComplianceConfig(config) {
+        // {
+        //     "message": "text text text",
+        //     "dismiss": "Got it!",
+        //     "link": "Learn more",
+        //     "href": "link"
+        // }
+        this.cookiesComplianceConfig = config;
+    }
+
+    function initContinentsSelectors(placeholder) {
+        $('[data-country-dropdown="true"]').select2({
+            'width': '100%',
+            placeholder: placeholder
+        });
+        $('[data-country-holder="true"]').find('.select2').hide();
+
+        $('[data-country-selector="true"]').on('change selected-by-user', function () {
+            if (typeof $(this).data('all') !== 'undefined') {
+                Store.index.applyCountrySelection($(this).data('all'));
+            }
+
+            $('[data-country-selector="true"]').not($(this)).attr('checked', false).each(function () {
+                $(this).closest($('[data-country-holder="true"]')).find('.select2').hide();
+            });
+            $(this).closest($('[data-country-holder="true"]')).find('.select2').toggle();
+
+        });
+
+        $('[data-selected-country="true"]').attr('checked', true).trigger('selected-by-user');
+
+        $('select').on('select2:select', function (evt) {
+            Store.index.applyCountrySelection($(this).val());
+        });
+
+        if ($('[data-country-selector="true"]:checked').length == 0) {
+            $('[data-all]').attr('checked', true);
+        }
+    }
+
+    function applyCountrySelection(url) {
+        $.ajax({
+            method: "POST",
+            url: url,
+            processData: false,
+            contentType: false,
+            cache: false
+        })
+            .done(function (response, status, xhr) {
+                location.reload();
+            })
+            .fail(function (response, status, xhr) {
+                if (response.status === 401) {
+                    location.reload();
+                }
+            });
+    }
+
+    function init() {
+        $(document).ready(function () {
+            initClipboard('.btn-clipboard');
+
+            if (typeof Store.index.cookiesComplianceConfig == 'object') {
+                window.cookieconsent.initialise({
+                    "palette": {
+                        "popup": {
+                            "background": "#f6f6f6",
+                            "text": "#6d6e71"
+                        },
+                        "button": {
+                            "background": "#ffcb01",
+                            "text": "#6d6e71"
+                        }
+                    },
+                    "content": Store.index.cookiesComplianceConfig
+                });
+            }
+        });
+    }
+
+    return {
+        init: init,
+        autoresizeTextAreas: autoresizeTextAreas,
+        ajaxPreloader: ajaxPreloader,
+        ajaxPreloaderContainer: ajaxPreloaderContainer,
+        buttonPreloader: buttonPreloader,
+        initializeTooltips: initializeTooltips,
+        setCookiesComplianceConfig: setCookiesComplianceConfig,
+        initContinentsSelectors: initContinentsSelectors,
+        applyCountrySelection: applyCountrySelection,
+        addLoading: addLoading,
+        removeLoading: removeLoading,
+    }
+}());
